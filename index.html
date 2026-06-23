@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URL 缩短工具 | URL Shortener</title>
     <link rel="stylesheet" href="style.css">
+    <!-- QR Code 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -45,6 +47,15 @@
                     <div class="url-display">
                         <span id="shortCode"></span>
                         <button id="copyCodeBtn" class="btn btn-copy">📋 复制</button>
+                    </div>
+                </div>
+
+                <!-- 新增：QR 码部分 -->
+                <div class="result-item">
+                    <label>二维码：</label>
+                    <div class="qr-container">
+                        <div id="qrCode" class="qr-code"></div>
+                        <button id="downloadQrBtn" class="btn btn-copy">⬇️ 下载二维码</button>
                     </div>
                 </div>
             </div>
