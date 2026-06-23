@@ -10,6 +10,8 @@ const copyCodeBtn = document.getElementById('copyCodeBtn');
 const historyList = document.getElementById('historyList');
 const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 const toast = document.getElementById('toast');
+const qrCodeContainer = document.getElementById('qrCode');
+const downloadQrBtn = document.getElementById('downloadQrBtn');
 
 // 存储空间前缀
 const STORAGE_KEY = 'urlShortenerHistory';
@@ -31,6 +33,7 @@ function setupEventListeners() {
     copyBtn.addEventListener('click', () => copyToClipboard(shortenedUrlElement.textContent, '短链接'));
     copyCodeBtn.addEventListener('click', () => copyToClipboard(shortCodeElement.textContent, '短链接码'));
     clearHistoryBtn.addEventListener('click', clearHistory);
+    downloadQrBtn.addEventListener('click', downloadQRCode);
 }
 
 // 生成短码
@@ -51,6 +54,35 @@ function isValidURL(string) {
     } catch (_) {
         return false;
     }
+}
+
+// 生成 QR 码
+function generateQRCode(url) {
+    qrCodeContainer.innerHTML = '';
+    new QRCode(qrCodeContainer, {
+        text: url,
+        width: 200,
+        height: 200,
+        colorDark: '#667eea',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+// 下载 QR 码
+function downloadQRCode() {
+    const canvas = qrCodeContainer.querySelector('canvas');
+    if (!canvas) {
+        showToast('QR 码还未生成', 'error');
+        return;
+    }
+    
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `qrcode-${shortCodeElement.textContent}.png`;
+    link.click();
+    
+    showToast('QR 码已下载', 'success');
 }
 
 // 缩短 URL
@@ -77,6 +109,9 @@ function shortenURL() {
     shortenedUrlElement.textContent = shortenedURL;
     shortCodeElement.textContent = shortCode;
     resultSection.classList.remove('hidden');
+
+    // 生成 QR 码（新增功能）
+    generateQRCode(shortenedURL);
 
     // 保存到历史
     saveToHistory(url, shortCode, shortenedURL);
@@ -130,7 +165,7 @@ function loadHistory() {
     const history = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
     if (history.length === 0) {
-        historyList.innerHTML = '<p class="empty-message">还没有缩短过 URL，开始使用吧！<\/p>';
+        historyList.innerHTML = '<p class="empty-message">还没有缩短过 URL，开始使用吧！</p>';
         clearHistoryBtn.classList.add('hidden');
         return;
     }
@@ -139,12 +174,12 @@ function loadHistory() {
     historyList.innerHTML = history.map(item => `
         <div class="history-item">
             <div class="history-item-content">
-                <div class="history-original">原始: ${escapeHtml(item.originalUrl)}<\/div>
-                <div class="history-short">${item.shortenedUrl}<\/div>
-            <\/div>
-            <div class="history-time">${item.timestamp}<\/div>
-            <button class="btn btn-copy" onclick="copyToClipboard('${item.shortenedUrl}', '短链接')">📋<\/button>
-        <\/div>
+                <div class="history-original">原始: ${escapeHtml(item.originalUrl)}</div>
+                <div class="history-short">${item.shortenedUrl}</div>
+            </div>
+            <div class="history-time">${item.timestamp}</div>
+            <button class="btn btn-copy" onclick="copyToClipboard('${item.shortenedUrl}', '短链接')">📋</button>
+        </div>
     `).join('');
 }
 
